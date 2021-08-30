@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { UsersService } from './users/users.service';
 
 // 요청, 응답에 대해서는 모름.
 // 서비스에서는 순수하게 해야하는 동작만 수행하고
@@ -6,10 +7,11 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class AppService {
+  constructor(private userService: UsersService) {}
   // getHello(): string {
   //   return '안녕 친구들!';
   // }
-
+  
   async getSwim() {
     return process.env.SECRET;
   }

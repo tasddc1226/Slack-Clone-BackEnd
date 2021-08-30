@@ -1,32 +1,48 @@
 import { Body, Controller, Get, Post, Req, Res } from '@nestjs/common';
+import { ApiOkResponse, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { UserDto } from 'src/common/dto/user.dto';
 import { JoinRequestDto } from './dto/join.request.dto';
 import { UsersService } from './users.service';
 
+@ApiTags('USER')
 @Controller('api/users')
 export class UsersController {
     constructor(private usersService: UsersService){
 
     }
 
-    // get: users
-    // 내 정보 return
+    @ApiOkResponse({
+        description: '성공',
+        type: UserDto,
+    })
+    @ApiResponse({
+        status: 500,
+        description: '서버 에러',
+    })
+    @ApiOperation({ summary: '내 정보 조회' })
     @Get()
-    getUsers() {
-
+    getUsers(@Req() req) {
+        return req.user;
     }
-    // post: users
+    
+    @ApiOperation({ summary: '회원 가입' })
     @Post()
     postUsers(@Body() data: JoinRequestDto) {
         // usersService 호출!
         this.usersService.postUsers(data.email, data.nickname, data.password);
     }
-    // post: users/login
+    
+    @ApiOkResponse({
+        description: '성공',
+        type: UserDto,
+    })
+    @ApiOperation({ summary: '로그인' })
     @Post('login')
     logIn(@Req() req) {
         return req.user;
     }   
-    // post: users/logout
-    // express의 Req, Res 사용
+    
+    @ApiOperation({ summary: '로그 아웃' })
     @Post('logout')
     logOut(@Req() req, @Res() res) {
         req.logOut();
