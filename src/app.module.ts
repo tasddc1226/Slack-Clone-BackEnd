@@ -15,14 +15,7 @@ import { UsersModule } from './users/users.module';
 import { WorkspacesModule } from './workspaces/workspaces.module';
 import { ChannelsModule } from './channels/channels.module';
 import { DmsModule } from './dms/dms.module';
-import { ChannelChats } from './entities/ChannelChats';
-import { ChannelMembers } from './entities/ChannelMembers';
-import { Channels } from './entities/Channels';
-import { DMs } from './entities/DMs';
-import { Mentions } from './entities/Mentions';
 import { Users } from './entities/Users';
-import { WorkspaceMembers } from './entities/WorkspaceMembers';
-import { Workspaces } from './entities/Workspaces';
 import { UsersService } from './users/users.service';
 
 @Module({
@@ -31,9 +24,8 @@ import { UsersService } from './users/users.service';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    TypeOrmModule.forRoot(
-      ormconfig
-    ),
+    TypeOrmModule.forRoot(ormconfig),
+    TypeOrmModule.forFeature([Users]),
     UsersModule,
     WorkspacesModule,
     ChannelsModule,
