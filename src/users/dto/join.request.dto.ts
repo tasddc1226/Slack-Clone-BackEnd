@@ -2,27 +2,11 @@
 // 인터페이스와 비슷한 역할을 하면서, js로 바뀌어도
 // 계속 class가 남아있어서 type 검증?(validation) 가능
 
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiProperty, PickType } from "@nestjs/swagger";
+import { Users } from "../../entities/Users";
 
-export class JoinRequestDto {
-    @ApiProperty({
-        example: 'abcd@gmail.com',
-        description: '이메일',
-        required: true,
-    })
-    public email: string;
-
-    @ApiProperty({
-        example: '수구리',
-        description: '닉네임',
-        required: true,
-    })
-    public nickname: string;
-
-    @ApiProperty({
-        example: 'password1234',
-        description: '비밀 번호',
-        required: true,
-    })
-    public password: string;
-}
+export class JoinRequestDto extends PickType(Users, [
+    'email',
+    'nickname',
+    'password',
+] as const) { }

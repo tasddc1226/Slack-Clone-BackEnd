@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 @Injectable()
 export class UsersService {
 
-    postUsers(email: string, nickname: string, password: string) {
-        
+    join(email: string, nickname: string, password: string) {
+
     }
 }
