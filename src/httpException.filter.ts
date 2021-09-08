@@ -14,25 +14,22 @@ export class HttpExceptionFilter implements ExceptionFilter {
         const response = ctx.getResponse<Response>();
         const status = exception.getStatus(); // 400 ..
         const err = exception.getResponse() as // error msg
-            | string
-            | { error: string; statusCode: 400; message: string[] };
+            | { message: any, statusCode: number } // error 메시지 커스터마이징한 string
+            | { error: string; statusCode: 400; message: string[] }; // class-validator가 주는 메시지 형식
         // let msg = '';
-
-        console.log(status, err);
-
-        response.status(status).json({ msg: err });
-        // if (typeof err !== 'string' && err.error === 'Bad Request') {
-        //     return response.status(status).json({
-        //         success: false,
-        //         code: status,
-        //         data: err.message,
-        //     });
-        // }
-
-        // response.status(status).json({
-        //     success: false,
-        //     code: status,
-        //     data: err,
-        // });
+        // class-validator의 error 메시지인 경우
+        if (typeof err !== 'string' && err.statusCode === 400) {
+            return response.status(status).json({
+                success: false,
+                code: status,
+                data: err.message,
+            });
+        }
+        // error msg가 string인 경우를 서로 다르게 format
+        response.status(status).json({
+            success: false,
+            code: status,
+            data: err.message,
+        });
     }
 }

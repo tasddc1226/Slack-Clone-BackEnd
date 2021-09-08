@@ -1,3 +1,4 @@
+import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
@@ -8,6 +9,7 @@ declare const module: any;
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const port = process.env.PORT || 3000; // port값이 없으면 3000으로..!
+  app.useGlobalPipes(new ValidationPipe()); // DTO에서 사용된 class-validator 적용
   app.useGlobalFilters(new HttpExceptionFilter()); // 모든 컨트롤러에서 발생하는 HttpException을 처리!
 
   // localhost:PORT/api 에 자동으로 api 문서들을 만들어준다.
