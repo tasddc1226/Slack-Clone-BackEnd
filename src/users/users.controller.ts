@@ -5,9 +5,11 @@ import {
     Post,
     Req,
     Res,
+    UseGuards,
     UseInterceptors
 } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { LocalAuthGuard } from 'src/auth/local-auth.guard';
 import { User } from 'src/common/decorators/user.decorator';
 import { UserDto } from 'src/common/dto/user.dto';
 import { UndefinedToNullInterceptor } from 'src/common/interceptors/undefinedToNull.interceptor';
@@ -58,6 +60,7 @@ export class UsersController {
         description: '서버 에러',
     })
     @ApiOperation({ summary: '로그인' })
+    @UseGuards(LocalAuthGuard)
     @Post('login')
     logIn(@User() user) {
         return user;
