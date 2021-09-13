@@ -11,6 +11,7 @@ export class AuthService {
     ) { }
 
     async validateUser(email: string, password: string) {
+        // 서비스에서 서비스를 호출하는 것 보다는 레포지토리를 호출하자
         const user = await this.usersRepository.findOne({
             where: { email }, // 이메일을 통해서 해당 유저를 찾음.
         });
@@ -20,8 +21,8 @@ export class AuthService {
         }
         const result = await bcrypt.compare(password, user.password);
         if (result) { // 비밀번호 까지 일치한다면
-            const result = await bcrypt.compare(password, ...userWithoutPassword) = user;
-            // delete user.password; 하면 비밀번호만 남음. 위의 줄과 동일함
+            // 구조분해 할당과 Rest 문법을 사용하여 해당 유저의 비밀번호를 제외한 나머지를 리턴
+            const { password, ...userWithoutPassword } = user;
             return userWithoutPassword;
         }
         return null;
