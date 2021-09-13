@@ -10,6 +10,8 @@ import {
 } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { LocalAuthGuard } from 'src/auth/local-auth.guard';
+import { LoggedInGuard } from 'src/auth/logged-in.guard';
+import { NotLoggedInGuard } from 'src/auth/not-logged-in.guard';
 import { User } from 'src/common/decorators/user.decorator';
 import { UserDto } from 'src/common/dto/user.dto';
 import { UndefinedToNullInterceptor } from 'src/common/interceptors/undefinedToNull.interceptor';
@@ -34,6 +36,7 @@ export class UsersController {
     @ApiOperation({ summary: '내 정보 조회' })
     @Get()
     getUsers(@User() user) {     // User 데코레이터를 사용
+        // user가 오면 login한 상태, false이면 login 하지 않은 상태
         return user || false;
         // res.locals.jwt
         /*
@@ -44,6 +47,7 @@ export class UsersController {
         */
     }
 
+    @UseGuards(new NotLoggedInGuard()) // 로그인 하지 않은 사람만..
     @ApiOperation({ summary: '회원 가입' })
     @Post()
     async join(@Body() data: JoinRequestDto) {
@@ -60,12 +64,13 @@ export class UsersController {
         description: '서버 에러',
     })
     @ApiOperation({ summary: '로그인' })
-    @UseGuards(LocalAuthGuard)
+    @UseGuards(new LocalAuthGuard())
     @Post('login')
     logIn(@User() user) {
         return user;
     }
 
+    @UseGuards(new LoggedInGuard()) // 로그인 한 유저만
     @ApiOperation({ summary: '로그 아웃' })
     @Post('logout')
     logOut(@Req() req, @Res() res) {

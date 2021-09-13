@@ -17,6 +17,7 @@ import { ChannelsModule } from './channels/channels.module';
 import { DmsModule } from './dms/dms.module';
 import { Users } from './entities/Users';
 import { UsersService } from './users/users.service';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   // forRoot가 붙는 이유? => 추가적인 설정을 하기 위함
@@ -24,6 +25,7 @@ import { UsersService } from './users/users.service';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    AuthModule,
     TypeOrmModule.forRoot(ormconfig),
     TypeOrmModule.forFeature([Users]),
     UsersModule,

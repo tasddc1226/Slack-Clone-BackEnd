@@ -13,14 +13,18 @@ export class AuthService {
     async validateUser(email: string, password: string) {
         // 서비스에서 서비스를 호출하는 것 보다는 레포지토리를 호출하자
         const user = await this.usersRepository.findOne({
-            where: { email }, // 이메일을 통해서 해당 유저를 찾음.
+            // 이메일을 통해서 해당 유저를 찾음.
+            where: { email },
+            select: ['id', 'email', 'nickname', 'password'],
         });
         console.log(email, password, user);
         if (!user) {
-            return null; // 찾는 유저가 없다면 null return
+            // 찾는 유저가 없다면 null return
+            return null;
         }
         const result = await bcrypt.compare(password, user.password);
-        if (result) { // 비밀번호 까지 일치한다면
+        // 비밀번호 까지 일치한다면
+        if (result) {
             // 구조분해 할당과 Rest 문법을 사용하여 해당 유저의 비밀번호를 제외한 나머지를 리턴
             const { password, ...userWithoutPassword } = user;
             return userWithoutPassword;

@@ -14,6 +14,6 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
         if (!user) {
             throw new UnauthorizedException(); // status code : 401 예외 처리
         }
-        return done(null, user);
+        return done(null, user); // serializer user가 됨. 즉, req login 으로 감.
     }
 }

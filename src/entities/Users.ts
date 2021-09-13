@@ -38,7 +38,7 @@ export class Users {
 
   @IsString()
   @IsNotEmpty()
-  @Column('varchar', { name: 'password', length: 100, select: false })
+  @Column('varchar', { name: 'password', length: 100, select: false }) // select: false -> password를 제외하고 유저정보를 전달
   password: string;
 
   @CreateDateColumn()
