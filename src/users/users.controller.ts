@@ -1,81 +1,69 @@
 import {
     Body,
     Controller,
+    ForbiddenException,
     Get,
+    NotFoundException,
     Post,
-    Req,
-    Res,
+    Request,
+    Response,
     UseGuards,
     UseInterceptors
 } from '@nestjs/common';
-import { ApiOkResponse, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { LocalAuthGuard } from 'src/auth/local-auth.guard';
-import { LoggedInGuard } from 'src/auth/logged-in.guard';
-import { NotLoggedInGuard } from 'src/auth/not-logged-in.guard';
-import { User } from 'src/common/decorators/user.decorator';
-import { UserDto } from 'src/common/dto/user.dto';
-import { UndefinedToNullInterceptor } from 'src/common/interceptors/undefinedToNull.interceptor';
+import { ApiCookieAuth, ApiOkResponse, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { LocalAuthGuard } from '../auth/local-auth.guard';
+import { LoggedInGuard } from '../auth/logged-in.guard';
+import { NotLoggedInGuard } from '../auth/not-logged-in.guard';
+import { User } from '../common/decorators/user.decorator';
+import { UndefinedToNullInterceptor } from '../common/interceptors/undefinedToNull.interceptor';
+import { Users } from '../entities/Users';
 import { JoinRequestDto } from './dto/join.request.dto';
+import { LoginRequestDto } from './dto/login.request.dto';
 import { UsersService } from './users.service';
 
 // 전체 컨트롤러에 Interceptors 장착
 @UseInterceptors(UndefinedToNullInterceptor)
-@ApiTags('USER')
+@ApiTags('USERS')
 @Controller('api/users')
 export class UsersController {
     constructor(private usersService: UsersService) { }
 
-    @ApiOkResponse({
-        description: '성공',
-        type: UserDto,
-    })
-    @ApiResponse({
-        status: 500,
-        description: '서버 에러',
-    })
+    @ApiCookieAuth('connect.std')
     @ApiOperation({ summary: '내 정보 조회' })
     @Get()
-    getUsers(@User() user) {     // User 데코레이터를 사용
+    async getProfile(@User() user: Users) {
         // user가 오면 login한 상태, false이면 login 하지 않은 상태
         return user || false;
-        // res.locals.jwt
-        /*
-            express에서는 res.locals가 미들웨어간에 공유할 수 있는
-            변수 역할을 함. 이때는 req, res가 필수적으로 사용되어 짐.
-            이를 사용하게 되면 한 플랫폼에 종속되어짐.
-            => 해결하기 위해 커스텀 데코레이터를 사용함. 이를 통해 타입 추론도 가능해짐!
-        */
     }
 
-    @UseGuards(new NotLoggedInGuard()) // 로그인 하지 않은 사람만..
     @ApiOperation({ summary: '회원 가입' })
+    @UseGuards(NotLoggedInGuard) // 로그인 하지 않은 사람만..
     @Post()
     async join(@Body() data: JoinRequestDto) {
-        // usersService 호출!
-        await this.usersService.join(data.email, data.nickname, data.password);
+        const user = this.usersService.findByEmail(data.email);
+        if (!user) {
+            throw new NotFoundException();
+        }
+        await this.usersService.join(
+            data.email,
+            data.nickname,
+            data.password,
+        );
     }
 
-    @ApiOkResponse({
-        description: '로그인 성공',
-        type: UserDto,
-    })
-    @ApiResponse({
-        status: 500,
-        description: '서버 에러',
-    })
     @ApiOperation({ summary: '로그인' })
-    @UseGuards(new LocalAuthGuard())
+    @UseGuards(LocalAuthGuard)
     @Post('login')
-    logIn(@User() user) {
+    async logIn(@User() user: Users) {
         return user;
     }
 
-    @UseGuards(new LoggedInGuard()) // 로그인 한 유저만
-    @ApiOperation({ summary: '로그 아웃' })
+    @ApiCookieAuth('connect.sid')
+    @ApiOperation({ summary: '로그아웃' })
+    @UseGuards(LoggedInGuard)
     @Post('logout')
-    logOut(@Req() req, @Res() res) {
-        req.logOut();
+    async logOut(@Response() res) {
         res.clearCookie('connect.sid', { httpOnly: true });
-        res.send('ok');
+        return res.send('ok');
     }
 }

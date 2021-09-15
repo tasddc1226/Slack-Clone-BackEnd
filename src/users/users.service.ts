@@ -11,7 +11,13 @@ export class UsersService {
         private usersRepository: Repository<Users>,
     ) { }
 
-    // getUser() { }
+
+    async findByEmail(email: string) {
+        return this.usersRepository.findOne({
+            where: { email },
+            select: ['id', 'email', 'password'],
+        });
+    }
 
     async join(email: string, nickname: string, password: string) {
         const user = await this.usersRepository.findOne({ where: { email } });

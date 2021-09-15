@@ -1,8 +1,8 @@
 import { Injectable } from "@nestjs/common";
-import * as bcrypt from 'bcrypt'
 import { InjectRepository } from "@nestjs/typeorm";
-import { Users } from "src/entities/Users";
+import * as bcrypt from 'bcrypt'
 import { Repository } from "typeorm";
+import { Users } from "src/entities/Users";
 
 @Injectable()
 export class AuthService {
@@ -15,11 +15,11 @@ export class AuthService {
         const user = await this.usersRepository.findOne({
             // 이메일을 통해서 해당 유저를 찾음.
             where: { email },
-            select: ['id', 'email', 'nickname', 'password'],
+            select: ['id', 'email', 'password'],
         });
         console.log(email, password, user);
         if (!user) {
-            // 찾는 유저가 없다면 null return
+            // 찾는 유저가 없다면 return null
             return null;
         }
         const result = await bcrypt.compare(password, user.password);

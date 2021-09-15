@@ -2,7 +2,7 @@ import {
   MiddlewareConsumer,
   Module,
   NestModule,
-  RequestMethod
+  RequestMethod,
 } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
@@ -18,6 +18,7 @@ import { DmsModule } from './dms/dms.module';
 import { Users } from './entities/Users';
 import { UsersService } from './users/users.service';
 import { AuthModule } from './auth/auth.module';
+import { FrontendMiddleware } from './middlewares/frontend.middleware';
 
 @Module({
   // forRoot가 붙는 이유? => 추가적인 설정을 하기 위함
@@ -42,5 +43,9 @@ export class AppModule implements NestModule {
   // middleware 들은 consumer에 연결
   configure(consumer: MiddlewareConsumer): void {
     consumer.apply(LoggerMiddleware).forRoutes('*');
+    consumer.apply(FrontendMiddleware).forRoutes({
+      path: '/**',
+      method: RequestMethod.ALL,
+    });
   }
 }
