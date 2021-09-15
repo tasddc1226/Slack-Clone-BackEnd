@@ -19,6 +19,8 @@ import { Users } from './entities/Users';
 import { UsersService } from './users/users.service';
 import { AuthModule } from './auth/auth.module';
 import { FrontendMiddleware } from './middlewares/frontend.middleware';
+import { ChannelMembers } from './entities/ChannelMembers';
+import { WorkspaceMembers } from './entities/WorkspaceMembers';
 
 @Module({
   // forRoot가 붙는 이유? => 추가적인 설정을 하기 위함
@@ -28,7 +30,7 @@ import { FrontendMiddleware } from './middlewares/frontend.middleware';
     }),
     AuthModule,
     TypeOrmModule.forRoot(ormconfig),
-    TypeOrmModule.forFeature([Users]),
+    TypeOrmModule.forFeature([Users, ChannelMembers, WorkspaceMembers]),
     UsersModule,
     WorkspacesModule,
     ChannelsModule,

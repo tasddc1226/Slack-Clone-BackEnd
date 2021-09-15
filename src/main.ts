@@ -4,7 +4,6 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './httpException.filter';
 import * as passport from 'passport';
-import cookieParser from 'cookie-parser'
 import * as session from 'express-session';
 import { NestExpressApplication } from '@nestjs/platform-express';
 
@@ -31,17 +30,6 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
-  app.use(cookieParser());
-  app.use(
-    session({
-      resave: false,
-      saveUninitialized: false,
-      secret: process.env.COOKIE_SECRET,
-      cookie: {
-        httpOnly: true,
-      },
-    }),
-  );
   // session 동작을 위해 추가
   app.use(passport.initialize());
   app.use(passport.session());
