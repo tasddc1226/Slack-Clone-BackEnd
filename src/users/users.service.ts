@@ -44,7 +44,7 @@ export class UsersService {
                 nickname,
                 password: hashedPassword,
             });
-            throw new Error('롤백 테스트!');
+            // throw new Error('롤백 테스트!');
             const workspaceMember = queryRunner.manager.getRepository(WorkspaceMembers).create();
             workspaceMember.UserId = returned.id;
             workspaceMember.WorkspaceId = 1;
