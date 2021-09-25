@@ -74,5 +74,53 @@ export class WorkspacesService {
             .getMany();
 
     }
+    // 워크스페이스에 멤버를 초대하는 service
+    async createWorkspaceMembers(url, email) {
+        const workspace = await this.workspacesRepository.findOne({
+            where: { url },
+            join: {
+                alias: 'workspace',
+                // join한 테이블의 데이터까지 모두 가져옴
+                innerJoinAndSelect: {
+                    channels: 'workspace.Channels',
+                },
+            },
+        });
+        // use QueryBuilder
+        // this.workspacesRepository.createQueryBuilder('workspace').innerJoinAndSelect('workspace.channels', 'channels').getOne()
 
+        // 워크스페이스에 사용자를 추가하고 저장.
+        const user = await this.usersRepository.findOne({ where: { email } });
+        if (!user) {
+            return null;
+        }
+        const workspaceMember = new WorkspaceMembers();
+        workspaceMember.WorkspaceId = workspace.id;
+        workspaceMember.UserId = user.id;
+        await this.workspaceMembersRepository.save(workspaceMember);
+
+        // 유저를 모든 채널에 추가하는게 아니라 기본적으로 있는 일반 채널에 초대
+        const channelMember = new ChannelMembers();
+        channelMember.ChannelId = workspace.Channels.find(
+            (v) => v.name === '일반',
+        ).id;
+        channelMember.UserId = user.id;
+        await this.channelMembersRepository.save(channelMember);
+    }
+
+    // 워크스페이스에 있는 멤버들 가져오는 service
+    async getWorkspaceMember(url: string, id: number) {
+        return this.usersRepository
+            .createQueryBuilder('user')
+            .where('user.id = :id', { id })
+            .innerJoin(
+                'user.Workspaces',
+                'workspaces',
+                'workspaces.url = :url',
+                {
+                    url,
+                },
+            )
+            .getOne();
+    }
 }
