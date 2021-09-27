@@ -1,31 +1,30 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import {
+    Body, Controller, Delete, Get, Param, ParseIntPipe, Post, UseGuards
+} from '@nestjs/common';
+import { ApiCookieAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { isEmail } from 'class-validator';
+import { LoggedInGuard } from 'src/auth/logged-in.guard';
 import { User } from 'src/common/decorators/user.decorator';
 import { Users } from 'src/entities/Users';
 import { CreateWorkspaceDto } from './dto/create-workspace.dto';
 import { WorkspacesService } from './workspaces.service';
 
-@ApiTags('WORKSPACE')
+@ApiTags('WORKSPACES')
+@ApiCookieAuth('connect.sid')
+@UseGuards(LoggedInGuard)
 @Controller('api/workspaces')
 export class WorkspacesController {
-    constructor(
-        private workspacesService: WorkspacesService
-    ) { }
+    constructor(private workspacesService: WorkspacesService) { }
 
-
+    @ApiOperation({ summary: '내 워크스페이스 가져오기' })
     @Get()
-    getMyWorkspaces(@User() user: Users) { // 커스텀데코레이터 사용
+    async getMyWorkspaces(@User() user: Users) { // 커스텀데코레이터 사용
         return this.workspacesService.findMyWorkspaces(user.id);
-        // @Param or @Query는 기본적으로 문자열을 받아오기 때문에 myId : number로 하면 X
-        // type만 number로 명시할 뿐이지, 실제 JS값은 문자열이다.
-        // 1. parseInt(myId)로 넘겨주어 형변환을 시킨다.
-        // 2. +myId로 문자열모양을 숫자로 바꿔준다.
-        // 3. myId.valueOF()를 사용 등등이있지만,,
-        // ParseIntPipe를 사용하자.
     }
 
+    @ApiOperation({ summary: '워크스페이스 생성' })
     @Post()
-    createWorkspaces(@User() user: Users, @Body() body: CreateWorkspaceDto) {
+    async createWorkspaces(@User() user: Users, @Body() body: CreateWorkspaceDto) {
         return this.workspacesService.createWorkspace(
             body.workspace,
             body.url,
@@ -33,29 +32,43 @@ export class WorkspacesController {
         );
     }
 
+    @ApiOperation({ summary: '워크스페이스 멤버 가져오기' })
     @Get(':url/members')
-    getAllMembersFromWorkspace() {
-
+    async getAllMembersFromWorkspace(@Param('url') url: string) {
+        return this.workspacesService.getWorkspaceMembers(url);
     }
 
+    @ApiOperation({ summary: '워크스페이스 멤버 초대하기' })
     @Post(':url/members')
-    inviteMembersToWorkspace() {
-
+    async inviteMembersToWorkspace(
+        @Param('url') url: string,
+        @Body('email') email,
+    ) {
+        return this.workspacesService.createWorkspaceMembers(url, email);
     }
+
 
     @Delete(':url/members/:id')
     kickMemberFromWorkspace() {
 
     }
 
+    @ApiOperation({ summary: '워크스페이스 특정멤버 가져오기' })
     @Get(':url/members/:id')
-    getMemberInfoInWorkspace() {
-
+    async getWorkspaceMember(
+        @Param('url') url: string,
+        @Param('id', ParseIntPipe) id: number,
+    ) {
+        return this.workspacesService.getWorkspaceMember(url, id);
     }
 
+    @ApiOperation({ summary: '워크스페이스 특정멤버 가져오기' })
     @Get(':url/users/:id')
-    getWorkspaceUser() {
-
+    async getWorkspaceUser(
+        @Param('url') url: string,
+        @Param('id', ParseIntPipe) id: number,
+    ) {
+        return this.workspacesService.getWorkspaceMember(url, id);
     }
 
 }
