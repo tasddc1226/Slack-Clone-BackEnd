@@ -44,11 +44,16 @@ export class UsersController {
         if (!user) {
             throw new NotFoundException();
         }
-        await this.usersService.join(
+        const result = await this.usersService.join(
             data.email,
             data.nickname,
             data.password,
         );
+        if (result) {
+            return 'ok';
+        } else {
+            throw new ForbiddenException();
+        }
     }
 
     @ApiOperation({ summary: '로그인' })
