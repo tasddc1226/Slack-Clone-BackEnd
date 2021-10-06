@@ -13,8 +13,10 @@ import { ChannelsService } from './channels.service';
     TypeOrmModule.forFeature([
       Channels,
       ChannelMembers,
-      ChannelChats, Users, Workspaces
-    ])
+      ChannelChats,
+      Users,
+      Workspaces
+    ]),
   ],
   controllers: [ChannelsController],
   providers: [ChannelsService]

@@ -20,6 +20,7 @@ export class ChannelsService {
         private channelChatsRepository: Repository<ChannelChats>,
         @InjectRepository(Users)
         private usersRepository: Repository<Users>,
+        private readonly eventsGateway: EventsGateway,
     ) { }
 
     // id로 channel 찾기
@@ -142,7 +143,34 @@ export class ChannelsService {
             .getMany();
     }
 
-
+    // 워크스페이스 특정 채널에서 채팅 생성
+    async createWorkspaceChannelChats(
+        url: string,
+        name: string,
+        content: string,
+        myId: number,
+    ) {
+        const channel = await this.channelsRepository
+            .createQueryBuilder('channel')
+            .innerJoin('channel.Workspace', 'workspace', 'workspace.url = :url', {
+                url,
+            })
+            .where('channel.name = :name', { name })
+            .getOne();
+        const chats = new ChannelChats();
+        chats.content = content;
+        chats.UserId = myId;
+        chats.ChannelId = channel.id;
+        const savedChat = await this.channelChatsRepository.save(chats);
+        const chatWithUser = await this.channelChatsRepository.findOne({
+            where: { id: savedChat.id },
+            relations: ['User', 'Channel'],
+        });
+        this.eventsGateway.server
+            // .of(`/ws-${url}`)
+            .to(`/ws-${url}-${chatWithUser.ChannelId}`)
+            .emit('message', chatWithUser);
+    }
 
     // 채널에서 내가 아직 읽지 않은 메시지의 개수를 보여주는 api
     async getChannelUnreadsCount(url, name, after) {
